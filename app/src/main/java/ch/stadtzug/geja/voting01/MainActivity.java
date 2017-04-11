@@ -5,30 +5,31 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
-import java.io.BufferedReader;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,9 +38,10 @@ public class MainActivity extends AppCompatActivity {
     CameraSource cameraSource;
     TextView qr_inhalt;
     final int requestCameraPermissionID = 1001;
+
     String daten;
-    ProgressDialog pd;
     String url;
+    ArrayList<Abstimmung> abstimmungen;
 
 
     @Override
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 .setRequestedPreviewSize(640, 480)
                 .build();
 
-        //Event hinzufügen
+        //Kamera starten für das Scannen des QR-Code
         cameraPreview.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //BarcodeScanner erstellen und beim erkennen einen http GET Call aufrufen, um ein JSON Objekt zu erhalten
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
@@ -121,8 +124,14 @@ public class MainActivity extends AppCompatActivity {
                             vibrator.vibrate(100);
 
                             //QR Code Inhalt auslesen und Kamera stoppen
+
+                            //QR Inhalt im Textfeld darstellen (für Test)
                             qr_inhalt.setText(qrcodes.valueAt(0).displayValue);
+
+                            //QR Daten in ArrayList speichern
                             daten = qrcodes.valueAt(0).toString();
+
+                            //Kameraaufnahme stoppen
                             cameraSource.stop();
 
                             //Hole die Abstimmungsdaten anhand ID aus QR Code
@@ -131,8 +140,7 @@ public class MainActivity extends AppCompatActivity {
                                 url = "http://212.4.70.74/abstimmungen/1";
                             }
 
-                            new JsonTask().execute(url);
-
+                            getAbstimmung();
 
                         }
                     });
@@ -144,81 +152,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void getAbstimmung() {
+        JsonObjectRequest request = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            abstimmungen.add(new Abstimmung(response.getInt("id"), response.getString("name"), response.getString("text")));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener(){
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+    }
+
     public void startVotingActivity() {
         // TODO: start LifecylceLogActivity
         Intent i = new Intent(MainActivity.this, votingActivity.class);
-        i.putExtra("QR_Daten", daten);
+        i.putExtra("Abstimmungsdaten", abstimmungen);
         startActivity(i);
     }
 
 
-    private class JsonTask extends AsyncTask<String, String, String>
-    {
 
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            pd = new ProgressDialog(MainActivity.this);
-            pd.setMessage("Bitte warten");
-            pd.setCancelable(false);
-            pd.show();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-
-            try {
-                URL url = new URL(params[0]);
-                connection = (HttpURLConnection)url.openConnection();
-                connection.connect();
-
-                InputStream inputStream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-
-                while ((line = reader.readLine()) != null){
-                    buffer.append(line+"\n");
-                    Log.d("Response: ", "> " + line);
-                }
-
-                return buffer.toString();
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                //Verbindung trennen
-                if (connection != null){
-                    connection.disconnect();
-                }
-                try {
-                    //Reader schliessen
-                    if (reader != null)
-                    {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            if (pd.isShowing()){
-                pd.dismiss();
-            }
-        }
-    }
 
 }
