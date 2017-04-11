@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="40dp"
+    android:background="@drawable/background"
+    >
+
+    
+    <SurfaceView
+        android:id="@+id/cameraPreview"
+        android:layout_marginTop="150dp"
+        android:layout_width="match_parent"
+        android:layout_height="240dp" />
+    <TextView
+        android:layout_below="@+id/cameraPreview"
+        android:id="@+id/qr_text"
+        android:text="@string/qr_text"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_below="@+id/qr_text"
+        android:id="@+id/qr_inhalt"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>
