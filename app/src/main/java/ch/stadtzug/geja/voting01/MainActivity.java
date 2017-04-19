@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -14,6 +15,7 @@ import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -41,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
 
     String daten;
     String url;
+    String abstimmungsID;
+    String abstimmungsText = "Keine Abstimmung gefunden.";
+
     ArrayList<Abstimmung> abstimmungen;
 
 
@@ -129,7 +134,15 @@ public class MainActivity extends AppCompatActivity {
                             qr_inhalt.setText(qrcodes.valueAt(0).displayValue);
 
                             //QR Daten in ArrayList speichern
-                            daten = qrcodes.valueAt(0).toString();
+                            daten = qrcodes.valueAt(0).displayValue;
+
+                            //Toast für Testzwecke
+                            Context context = getApplicationContext();
+                            CharSequence text = "QR Daten sind: " + daten;
+                            int duration = Toast.LENGTH_LONG;
+
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
 
                             //Kameraaufnahme stoppen
                             cameraSource.stop();
@@ -138,15 +151,15 @@ public class MainActivity extends AppCompatActivity {
                             if (daten.contains("voteID:1"))
                             {
                                 url = "http://212.4.70.74/abstimmungen/1";
+                                getAbstimmung();
+
                             }
 
-                            getAbstimmung();
+                            startVotingActivity();
 
                         }
                     });
-
                 }
-
             }
         });
 
@@ -155,12 +168,19 @@ public class MainActivity extends AppCompatActivity {
     private void getAbstimmung() {
         JsonObjectRequest request = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            abstimmungen.add(new Abstimmung(response.getInt("id"), response.getString("name"), response.getString("text")));
+                            abstimmungsID = response.getString("id");
+                            String abstimmungsName = response.getString("name");
+                            abstimmungsText = response.getString("text");
+
+                            startVotingActivity();
+
                         } catch (JSONException e) {
-                            e.printStackTrace();
+
+                            Toast.makeText(MainActivity.this,"Etwas hat da nicht geklappt.", Toast.LENGTH_LONG).show();
                         }
 
                     }
@@ -169,14 +189,18 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
+                        Toast.makeText(MainActivity.this,"Etwas hat da nicht geklappt.", Toast.LENGTH_LONG).show();
+
                     }
                 });
+
+        ApplicationController.getInstance(MainActivity.this).addToRequestQueue(request);
     }
 
     public void startVotingActivity() {
         // TODO: start LifecylceLogActivity
         Intent i = new Intent(MainActivity.this, votingActivity.class);
-        i.putExtra("Abstimmungsdaten", abstimmungen);
+        i.putExtra("abstimmungsText", abstimmungsText);
         startActivity(i);
     }
 
