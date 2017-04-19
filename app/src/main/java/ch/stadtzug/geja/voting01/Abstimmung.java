@@ -1,35 +1,61 @@
 package ch.stadtzug.geja.voting01;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
+
 /**
  * Created by gerlach jan on 11.04.2017.
  */
 
-class Abstimmung {
-    private int id;
-    private String Name;
+class Abstimmung implements Parcelable {
+    private String id;
+    private String name;
     private String abstimmungstext;
     private String option1, option2, option3;
 
-    public Abstimmung(int id, String name, String abstimmungstext) {
+    public Abstimmung(String id, String name, String abstimmungstext) {
         this.id = id;
-        Name = name;
+        this.name = name;
         this.abstimmungstext = abstimmungstext;
     }
 
-    public int getId() {
+    protected Abstimmung(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        abstimmungstext = in.readString();
+        option1 = in.readString();
+        option2 = in.readString();
+        option3 = in.readString();
+    }
+
+    public static final Creator<Abstimmung> CREATOR = new Creator<Abstimmung>() {
+        @Override
+        public Abstimmung createFromParcel(Parcel in) {
+            return new Abstimmung(in);
+        }
+
+        @Override
+        public Abstimmung[] newArray(int size) {
+            return new Abstimmung[size];
+        }
+    };
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public String getAbstimmungstext() {
@@ -62,5 +88,20 @@ class Abstimmung {
 
     public void setOption3(String option3) {
         this.option3 = option3;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(abstimmungstext);
+        dest.writeString(option1);
+        dest.writeString(option2);
+        dest.writeString(option3);
     }
 }

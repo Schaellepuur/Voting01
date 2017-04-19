@@ -7,28 +7,29 @@
     android:padding="40dp">
 
     <TextView
-        android:id="@+id/Voting1"
+        android:id="@+id/abstimmungstext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:layout_marginTop="16dp"
-        android:text="Wer soll nächster türkischer Präsident werden?"
+        android:text="Keine Abstimmung gefunden."
         android:textColor="#FFF"
         />
 
-    <CheckBox android:id="@+id/checkbox_MaxMuster"
+    <CheckBox android:id="@+id/checkbox_1"
+        android:layout_marginTop="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="false"
-        android:text="Max Muster"
+        android:text="Option 1"
         android:textColor="#FFF"
         />
 
-    <CheckBox android:id="@+id/checkbox_PeterMuller"
+    <CheckBox android:id="@+id/checkbox_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="false"
-        android:text="Peter Müller"
+        android:text="Option 2"
         android:textColor="#FFF"
 
        />
