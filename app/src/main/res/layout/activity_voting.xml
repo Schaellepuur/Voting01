@@ -42,6 +42,6 @@
         android:id="@+id/button"
         android:background="@drawable/selector_xml_btn_yellow"
         android:layout_gravity="center_horizontal"
-        android:onClick="checkStimme"/>
+        android:onClick="vote"/>
 
 </LinearLayout>

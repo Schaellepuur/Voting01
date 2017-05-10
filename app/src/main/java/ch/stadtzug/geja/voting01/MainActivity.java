@@ -1,11 +1,9 @@
 package ch.stadtzug.geja.voting01;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -31,7 +29,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,13 +38,15 @@ public class MainActivity extends AppCompatActivity {
     TextView qr_inhalt;
     final int requestCameraPermissionID = 1001;
 
-    String daten;
+    String qr_daten;
     String url;
+
+    //Variabeln für VotingActivity
     String abstimmungsID;
+    String authkey;
     String abstimmungsText = "Keine Abstimmung gefunden.";
-
-    ArrayList<Abstimmung> abstimmungen;
-
+    String option1;
+    String option2;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -134,28 +133,37 @@ public class MainActivity extends AppCompatActivity {
                             qr_inhalt.setText(qrcodes.valueAt(0).displayValue);
 
                             //QR Daten in ArrayList speichern
-                            daten = qrcodes.valueAt(0).displayValue;
+                            qr_daten = qrcodes.valueAt(0).displayValue;
 
-                            //Toast für Testzwecke
-                            Context context = getApplicationContext();
-                            CharSequence text = "QR Daten sind: " + daten;
-                            int duration = Toast.LENGTH_LONG;
+                            //Key splitten und speichern
+                            String[] separated = qr_daten.split(":");
+                            separated = separated[1].split("\\s");
+                            authkey = separated[1];
 
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.show();
+                            Toast.makeText(MainActivity.this, authkey, Toast.LENGTH_LONG).show();
 
                             //Kameraaufnahme stoppen
                             cameraSource.stop();
 
                             //Hole die Abstimmungsdaten anhand ID aus QR Code
-                            if (daten.contains("voteID:1"))
+                            if (qr_daten.contains("voteID:1"))
                             {
                                 url = "http://212.4.70.74/abstimmungen/1";
                                 getAbstimmung();
 
                             }
 
-                            startVotingActivity();
+                            else if (qr_daten.contains("voteID:2"))
+                            {
+                                url = "http://212.4.70.74/abstimmungen/2";
+                                getAbstimmung();
+                            }
+
+                            else{
+
+                                Toast.makeText(MainActivity.this,"Dieser QR Code ist nicht bekannt, die Anwendung wird beendet.", Toast.LENGTH_LONG).show();
+                                finishAndRemoveTask();
+                            }
 
                         }
                     });
@@ -172,9 +180,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            abstimmungsID = response.getString("id");
-                            String abstimmungsName = response.getString("name");
+
                             abstimmungsText = response.getString("text");
+                            option1 = response.getString("option1");
+                            option2 = response.getString("option2");
 
                             startVotingActivity();
 
@@ -198,9 +207,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startVotingActivity() {
-        // TODO: start LifecylceLogActivity
         Intent i = new Intent(MainActivity.this, votingActivity.class);
         i.putExtra("abstimmungsText", abstimmungsText);
+        i.putExtra("option1", option1);
+        i.putExtra("option2", option2);
+        i.putExtra("authkey", authkey);
         startActivity(i);
     }
 
