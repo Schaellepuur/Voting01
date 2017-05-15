@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     String url;
 
     //Variabeln für VotingActivity
-    String abstimmungsID;
+    String voteID;
     String authkey;
     String abstimmungsText = "Keine Abstimmung gefunden.";
     String option1;
@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
                             //Hole die Abstimmungsdaten anhand ID aus QR Code
                             if (qr_daten.contains("voteID:1"))
                             {
+                                voteID = "voteID:1";
                                 url = "http://212.4.70.74/abstimmungen/1";
                                 getAbstimmung();
 
@@ -155,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
                             else if (qr_daten.contains("voteID:2"))
                             {
+                                voteID = "voteID:2";
                                 url = "http://212.4.70.74/abstimmungen/2";
                                 getAbstimmung();
                             }
@@ -212,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
         i.putExtra("option1", option1);
         i.putExtra("option2", option2);
         i.putExtra("authkey", authkey);
+        i.putExtra("voteID", voteID);
         startActivity(i);
     }
 
