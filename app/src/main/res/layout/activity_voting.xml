@@ -13,26 +13,32 @@
         android:ems="10"
         android:layout_marginTop="16dp"
         android:text="Keine Abstimmung gefunden."
+        android:textAlignment="center"
         android:textColor="#FFF"
         />
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <CheckBox android:id="@+id/checkbox_1"
-        android:layout_marginTop="15dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:text="Option 1"
-        android:textColor="#FFF"
-        />
+        <RadioButton android:id="@+id/radiobutton_1"
+            android:layout_marginTop="15dp"
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Option 1"
+            android:textColor="#FFF"
+            />
 
-    <CheckBox android:id="@+id/checkbox_2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:text="Option 2"
-        android:textColor="#FFF"
+        <RadioButton android:id="@+id/radiobutton_2"
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Option 2"
+            android:textColor="#FFF"
+            />
+    </RadioGroup>
 
-       />
+
 
     <Button
         android:layout_width="match_parent"

@@ -2,4 +2,5 @@
     <string name="app_name">Voting01</string>
     <string name="title_activity_voting">votingActivity</string>
     <string name="qr_text">Bitte scannen Sie den QR code auf ihrem Stimmcouvert</string>
+    <string name="title_activity_voting_locked">votingLocked</string>
 </resources>

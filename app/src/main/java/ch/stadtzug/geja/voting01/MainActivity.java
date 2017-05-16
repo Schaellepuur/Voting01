@@ -68,6 +68,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle icicle) {
+        if (getIntent().getBooleanExtra("EXIT", false)) {
+                finish();
+        }
+
         super.onCreate(icicle);
         setContentView(R.layout.activity_main);
 
@@ -130,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                             //QR Code Inhalt auslesen und Kamera stoppen
 
                             //QR Inhalt im Textfeld darstellen (für Test)
-                            qr_inhalt.setText(qrcodes.valueAt(0).displayValue);
+                            //qr_inhalt.setText(qrcodes.valueAt(0).displayValue);
 
                             //QR Daten in ArrayList speichern
                             qr_daten = qrcodes.valueAt(0).displayValue;

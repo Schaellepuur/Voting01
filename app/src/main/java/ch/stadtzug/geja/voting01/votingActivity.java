@@ -1,20 +1,27 @@
 package ch.stadtzug.geja.voting01;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,7 +29,7 @@ import java.net.URL;
 public class votingActivity extends AppCompatActivity {
 
     private String vote = null;
-    CheckBox option1, option2;
+    RadioButton option1, option2;
     TextView abstimmungstext;
     String stringAuthkey;
     int authkey;
@@ -31,13 +38,15 @@ public class votingActivity extends AppCompatActivity {
     String tOption1;
     String tOption2;
 
+    String votingHash;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voting);
 
-        option1 = (CheckBox) findViewById(R.id.checkbox_1);
-        option2 = (CheckBox) findViewById(R.id.checkbox_2);
+        option1 = (RadioButton) findViewById(R.id.radiobutton_1);
+        option2 = (RadioButton) findViewById(R.id.radiobutton_2);
         abstimmungstext = (TextView) findViewById(R.id.abstimmungstext);
 
         //Daten von Intent der MainActivity holen
@@ -99,7 +108,6 @@ public class votingActivity extends AppCompatActivity {
         }
 
 
-
         //Stimme an Backendserver senden
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -124,8 +132,38 @@ public class votingActivity extends AppCompatActivity {
                     Log.i("STATUS", String.valueOf(connection.getResponseCode()));
                     Log.i("MSG" , connection.getResponseMessage());
 
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null){
+                        stringBuilder.append(line+"\n");
+                    }
+                    bufferedReader.close();
+                    String response = stringBuilder.toString();
+                    Log.i("Response", response);
+
+                    if (response.indexOf("locked") != -1){
+
+                        String[] separated = response.split(":");
+                        String tempString = separated[2];
+                        separated = tempString.split(",");
+                        votingHash = separated[0];
+                        votingHash = votingHash.replace("\"", "");
+
+                        Log.i("VotingHash ist", votingHash );
+
+                        Toast.makeText(votingActivity.this, "Sie haben bereits abgestimmt. ", Toast.LENGTH_LONG).show();
+                        startVotingLockedActivity();
+
+                    }
+
+                    else {
+
+                        Toast.makeText(votingActivity.this, "Sie haben gestimmt für: " + vote, Toast.LENGTH_LONG).show();
+
+                    }
                     connection.disconnect();
-                    Toast.makeText(votingActivity.this, "Sie haben gestimmt für: " + vote, Toast.LENGTH_LONG).show();
+
 
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -136,5 +174,11 @@ public class votingActivity extends AppCompatActivity {
         });
 
         thread.start();
+    }
+
+    public void startVotingLockedActivity() {
+        Intent i = new Intent(votingActivity.this, votingLocked.class);
+        i.putExtra("votingHash", votingHash);
+        startActivity(i);
     }
 }

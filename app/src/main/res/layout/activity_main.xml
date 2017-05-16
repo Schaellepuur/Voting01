@@ -12,11 +12,16 @@
         android:id="@+id/cameraPreview"
         android:layout_marginTop="150dp"
         android:layout_width="match_parent"
-        android:layout_height="240dp" />
+        android:layout_height="240dp"
+
+        />
+
     <TextView
         android:layout_below="@+id/cameraPreview"
         android:id="@+id/qr_text"
         android:text="@string/qr_text"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
